@@ -5,6 +5,7 @@ const routes = require('./router/friends.js')
 
 let users = []
 
+//This is a utility function and not an endpoint. Used to see if user exists. The register endpoint calls this function.
 const doesExist = (username)=>{
   let userswithsamename = users.filter((user)=>{
     return user.username === username
@@ -16,6 +17,7 @@ const doesExist = (username)=>{
   }
 }
 
+//This is also a utility function and not an endpoint. Used to check if the username and password matches with the list of registered users. The login endpoint calls this function.
 const authenticatedUser = (username,password)=>{
   let validusers = users.filter((user)=>{
     return (user.username === username && user.password === password)
@@ -50,6 +52,12 @@ app.use("/friends", function auth(req,res,next){
     }
 });
 
+/*
+    The login endpoint will do the following:
+    1. Return an error if the username or password is not provided.
+    2. Creates an access token that is valid for 1 hour (60 X 60 seconds) and logs the user in, if the credentials are correct.
+    3. Throws an error, if the credentials are incorrect.
+*/
 app.post("/login", (req,res) => {
   const username = req.body.username;
   const password = req.body.password;
@@ -61,7 +69,7 @@ app.post("/login", (req,res) => {
   if (authenticatedUser(username,password)) {
     let accessToken = jwt.sign({
       data: password
-    }, 'access', { expiresIn: 60 * 60 });
+    }, 'access', { expiresIn: 60 });
 
     req.session.authorization = {
       accessToken,username
